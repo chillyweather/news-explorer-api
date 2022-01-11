@@ -1,7 +1,16 @@
 const express = require('express');
 const helmet = require('helmet');
 const mongoose = require('mongoose');
-//  const { errors, Joi, celebrate } = require('celebrate');
+const { errors, Joi, celebrate } = require('celebrate');
+
+//  import routes
+const userRouter = require('./routes/users');
+const articleRouter = require('./routes/articles');
+
+//  import loggers
+const { requestLogger, errorLogger } = require('./middleware/logger');
+
+const { createUser, userLogin } = require('./controllers/users');
 
 //  error handling
 const { ErrorHandler } = require('./errors/error');
@@ -13,6 +22,7 @@ const time = `${today.getHours()}:${today.getMinutes()}:${today.getSeconds()}`;
 const { PORT = 3001 } = process.env;
 
 const app = express();
+const auth = require('./middleware/auth');
 
 //  connect database
 mongoose.connect('mongodb://localhost:27017/newsdb', {
@@ -23,6 +33,47 @@ mongoose.connect('mongodb://localhost:27017/newsdb', {
 //  use helmet
 app.use(helmet());
 app.use(express.json());
+
+app.use(express.json({ extended: true }));
+app.use(express.urlencoded({ extended: true }));
+
+//  logging requests
+app.use(requestLogger);
+
+//  routers
+app.use('/users', auth, userRouter);
+app.use('/articles', auth, articleRouter);
+
+//  register
+app.post(
+  '/signup',
+  celebrate({
+    body: Joi.object().keys({
+      name: Joi.string().min(2).max(30),
+      email: Joi.string().required().email(),
+      password: Joi.string().required(),
+    }),
+  }),
+  createUser,
+);
+
+//  login
+app.post(
+  '/signin',
+  celebrate({
+    body: Joi.object().keys({
+      email: Joi.string().required().email(),
+      password: Joi.string().required(),
+    }),
+  }),
+  userLogin,
+);
+
+//  error logger
+app.use(errorLogger);
+
+//  celebrate error handler
+app.use(errors());
 
 //  global error handler
 app.use((err, req, res, next) => {
