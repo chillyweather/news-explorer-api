@@ -37,7 +37,7 @@ module.exports.createArticle = (req, res, next) => {
 
 //  delete article
 module.exports.deleteArticle = (req, res, next) => {
-  Article.findByIdAndDelete(req.params.id)
+  Article.findById(req.params.id)
     .orFail()
     .then((article) => {
       if (req.user._id === article.owner._id.toString()) {
