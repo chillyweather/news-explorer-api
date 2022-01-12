@@ -2,6 +2,16 @@ const express = require('express');
 const helmet = require('helmet');
 const mongoose = require('mongoose');
 const { errors, Joi, celebrate } = require('celebrate');
+const cors = require('cors');
+
+// current time just for maintenance reasons
+const today = new Date();
+const time = `${today.getHours()}:${today.getMinutes()}:${today.getSeconds()}`;
+
+const { PORT = 3001 } = process.env;
+
+//  error handling
+const { ErrorHandler } = require('./errors/error');
 
 //  import routes
 const userRouter = require('./routes/users');
@@ -10,19 +20,8 @@ const articleRouter = require('./routes/articles');
 //  import loggers
 const { requestLogger, errorLogger } = require('./middleware/logger');
 
+//  controllers
 const { createUser, userLogin } = require('./controllers/users');
-
-//  error handling
-const { ErrorHandler } = require('./errors/error');
-
-// current time just for maintenance reasons
-const today = new Date();
-const time = `${today.getHours()}:${today.getMinutes()}:${today.getSeconds()}`;
-
-const { PORT = 3001 } = process.env;
-
-const app = express();
-const auth = require('./middleware/auth');
 
 //  connect database
 mongoose.connect('mongodb://localhost:27017/newsdb', {
@@ -30,10 +29,18 @@ mongoose.connect('mongodb://localhost:27017/newsdb', {
   useUnifiedTopology: true,
 });
 
+const app = express();
+const auth = require('./middleware/auth');
+
 //  use helmet
 app.use(helmet());
 app.use(express.json());
 
+//  Cors
+app.use(cors());
+app.options('*', cors());
+
+//  allows for rich objects and arrays to be encoded into the URL-encoded format
 app.use(express.json({ extended: true }));
 app.use(express.urlencoded({ extended: true }));
 
@@ -44,7 +51,7 @@ app.use(requestLogger);
 app.use('/users', auth, userRouter);
 app.use('/articles', auth, articleRouter);
 
-//  register
+//  register route
 app.post(
   '/signup',
   celebrate({
@@ -57,7 +64,7 @@ app.post(
   createUser,
 );
 
-//  login
+//  login route
 app.post(
   '/signin',
   celebrate({
