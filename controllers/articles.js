@@ -2,6 +2,7 @@ const { ErrorHandler } = require('../errors/error');
 
 //  errors
 const INVALID_DATA_ERROR = 400;
+const FORBIDDEN_ERROR = 403;
 const NOT_FOUND_ERROR = 404;
 
 const Article = require('../models/article');
@@ -39,10 +40,12 @@ module.exports.deleteArticle = (req, res, next) => {
   Article.findByIdAndDelete(req.params.id)
     .orFail()
     .then((article) => {
-      if (article) {
+      if (req.user._id === article.owner._id.toString()) {
         Article.deleteOne(article).then((deleted) => res.send(deleted));
       } else if (!article) {
-        throw new ErrorHandler(NOT_FOUND_ERROR, 'Article not found');
+        throw new ErrorHandler(NOT_FOUND_ERROR, 'Card not found');
+      } else {
+        throw new ErrorHandler(FORBIDDEN_ERROR, 'Only owner can delete this article');
       }
     })
     .catch((err) => {
