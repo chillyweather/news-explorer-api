@@ -11,7 +11,7 @@ const time = `${today.getHours()}:${today.getMinutes()}:${today.getSeconds()}`;
 const { PORT = 3001, NEWS_DB, NODE_ENV } = process.env;
 
 //  error handling
-const { ErrorHandler } = require('./errors/error');
+const { ErrorHandler, handleError } = require('./errors/error');
 
 //  import routes
 const userRouter = require('./routes/users');
@@ -92,13 +92,7 @@ app.get('*', (req, res) => {
 
 //  global error handler
 app.use((err, req, res, next) => {
-  const { statusCode = 500, message } = err;
-  res
-    .status(statusCode)
-    .send({
-      message:
-        statusCode === 500 ? 'Server error' : message,
-    });
+  handleError(err, res);
 });
 
 app.listen(PORT, () => {
