@@ -4,6 +4,9 @@ const mongoose = require('mongoose');
 const { errors, Joi, celebrate } = require('celebrate');
 const cors = require('cors');
 
+//  request limiter
+const { limiter } = require('./utils/constants');
+
 // current time just for maintenance reasons
 const today = new Date();
 const time = `${today.getHours()}:${today.getMinutes()}:${today.getSeconds()}`;
@@ -14,8 +17,9 @@ const { PORT = 3001, NEWS_DB, NODE_ENV } = process.env;
 const { ErrorHandler, handleError } = require('./errors/error');
 
 //  import routes
-const userRouter = require('./routes/users');
-const articleRouter = require('./routes/articles');
+const routes = require('./routes/index');
+// const userRouter = require('./routes/users');
+// const articleRouter = require('./routes/articles');
 
 //  import loggers
 const { requestLogger, errorLogger } = require('./middleware/logger');
@@ -32,11 +36,14 @@ mongoose.connect(dbLocation, {
 });
 
 const app = express();
-const auth = require('./middleware/auth');
+// const auth = require('./middleware/auth');
 
 //  use helmet
 app.use(helmet());
 app.use(express.json());
+
+// limit amount of requests
+app.use(limiter);
 
 //  Cors
 app.use(cors());
@@ -48,10 +55,6 @@ app.use(express.urlencoded({ extended: true }));
 
 //  logging requests
 app.use(requestLogger);
-
-//  routers
-app.use('/users', auth, userRouter);
-app.use('/articles', auth, articleRouter);
 
 //  register route
 app.post(
@@ -77,6 +80,10 @@ app.post(
   }),
   userLogin,
 );
+//  routers
+// app.use('/users', auth, userRouter);
+// app.use('/articles', auth, articleRouter);
+app.use('/', routes);
 
 //  error logger
 app.use(errorLogger);
