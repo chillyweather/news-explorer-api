@@ -8,8 +8,7 @@ const cors = require('cors');
 const today = new Date();
 const time = `${today.getHours()}:${today.getMinutes()}:${today.getSeconds()}`;
 
-const { PORT = 3001 } = process.env;
-// const { PORT = 3001, NEWS_DB, NODE_ENV } = process.env;
+const { PORT = 3001, NEWS_DB, NODE_ENV } = process.env;
 
 //  error handling
 const { ErrorHandler } = require('./errors/error');
@@ -25,8 +24,7 @@ const { requestLogger, errorLogger } = require('./middleware/logger');
 const { createUser, userLogin } = require('./controllers/users');
 
 //  connect database
-const dbLocation = 'mongodb://localhost:27017/newsdb';
-// const dbLocation = NODE_ENV === 'production' ? NEWS_DB : 'mongodb://localhost:27017/newsdb';
+const dbLocation = NODE_ENV === 'production' ? NEWS_DB : 'mongodb://localhost:27017/newsdb';
 
 mongoose.connect(dbLocation, {
   useNewUrlParser: true,
