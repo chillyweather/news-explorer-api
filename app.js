@@ -8,7 +8,7 @@ const cors = require('cors');
 const today = new Date();
 const time = `${today.getHours()}:${today.getMinutes()}:${today.getSeconds()}`;
 
-const { PORT = 3001 } = process.env;
+const { PORT = 3001, NEWS_DB, NODE_ENV } = process.env;
 
 //  error handling
 const { ErrorHandler } = require('./errors/error');
@@ -24,7 +24,9 @@ const { requestLogger, errorLogger } = require('./middleware/logger');
 const { createUser, userLogin } = require('./controllers/users');
 
 //  connect database
-mongoose.connect('mongodb://localhost:27017/newsdb', {
+const dbLocation = NODE_ENV === 'production' ? NEWS_DB : 'mongodb://localhost:27017/newsdb';
+
+mongoose.connect(dbLocation, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
@@ -82,6 +84,12 @@ app.use(errorLogger);
 //  celebrate error handler
 app.use(errors());
 
+// 404 for non-exist pages
+// eslint-disable-next-line no-unused-vars
+app.get('*', (req, res) => {
+  throw new ErrorHandler(404, 'Requested resource not found');
+});
+
 //  global error handler
 app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
@@ -91,12 +99,6 @@ app.use((err, req, res, next) => {
       message:
         statusCode === 500 ? 'Server error' : message,
     });
-});
-
-// 404 for non-exist pages
-// eslint-disable-next-line no-unused-vars
-app.get('*', (req, res) => {
-  throw new ErrorHandler(404, 'Requested resource not found');
 });
 
 app.listen(PORT, () => {
