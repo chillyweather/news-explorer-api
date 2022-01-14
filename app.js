@@ -4,8 +4,11 @@ const mongoose = require('mongoose');
 const { errors, Joi, celebrate } = require('celebrate');
 const cors = require('cors');
 
-//  request limiter
+//  import request limiter
 const { limiter } = require('./utils/constants');
+
+//  import constants
+const { ERROR_CODES, ERROR_MESSAGES } = require('./utils/constants');
 
 // current time just for maintenance reasons
 const today = new Date();
@@ -18,8 +21,6 @@ const { ErrorHandler, handleError } = require('./errors/error');
 
 //  import routes
 const routes = require('./routes/index');
-// const userRouter = require('./routes/users');
-// const articleRouter = require('./routes/articles');
 
 //  import loggers
 const { requestLogger, errorLogger } = require('./middleware/logger');
@@ -36,7 +37,6 @@ mongoose.connect(dbLocation, {
 });
 
 const app = express();
-// const auth = require('./middleware/auth');
 
 //  use helmet
 app.use(helmet());
@@ -94,7 +94,7 @@ app.use(errors());
 // 404 for non-exist pages
 // eslint-disable-next-line no-unused-vars
 app.get('*', (req, res) => {
-  throw new ErrorHandler(404, 'Requested resource not found');
+  throw new ErrorHandler(ERROR_CODES.default, ERROR_MESSAGES.notFound);
 });
 
 //  global error handler

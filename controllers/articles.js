@@ -1,9 +1,7 @@
 const { ErrorHandler } = require('../errors/error');
 
 //  errors
-const INVALID_DATA_ERROR = 400;
-const FORBIDDEN_ERROR = 403;
-const NOT_FOUND_ERROR = 404;
+const { ERROR_CODES, ERROR_MESSAGES } = require('../utils/constants');
 
 const Article = require('../models/article');
 
@@ -29,7 +27,7 @@ module.exports.createArticle = (req, res, next) => {
     .then((article) => res.send({ data: article }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new ErrorHandler(INVALID_DATA_ERROR, 'Invalid data');
+        throw new ErrorHandler(ERROR_CODES.invalidData, ERROR_MESSAGES.invalidData);
       }
     })
     .catch(next);
@@ -43,9 +41,9 @@ module.exports.deleteArticle = (req, res, next) => {
       if (req.user._id === article.owner._id.toString()) {
         Article.deleteOne(article).then((deleted) => res.send(deleted));
       } else if (!article) {
-        throw new ErrorHandler(NOT_FOUND_ERROR, 'Card not found');
+        throw new ErrorHandler(ERROR_CODES.notFound, ERROR_MESSAGES.notFound);
       } else {
-        throw new ErrorHandler(FORBIDDEN_ERROR, 'Only owner can delete this article');
+        throw new ErrorHandler(ERROR_CODES.forbidden, ERROR_MESSAGES.forbidden);
       }
     })
     .catch((err) => {

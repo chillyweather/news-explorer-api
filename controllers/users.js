@@ -4,10 +4,7 @@ const dotenv = require('dotenv');
 const { ErrorHandler } = require('../errors/error');
 
 //  errors
-const INVALID_DATA_ERROR = 400;
-const AUTHORIZATION_ERROR = 401;
-const NOT_FOUND_ERROR = 404;
-const CONFLICT_ERROR = 409;
+const { ERROR_CODES, ERROR_MESSAGES } = require('../utils/constants');
 
 const User = require('../models/user');
 
@@ -22,12 +19,12 @@ module.exports.getUser = (req, res, next) => {
       if (user) {
         res.send({ data: user });
       } else {
-        throw new ErrorHandler(NOT_FOUND_ERROR, 'User not found');
+        throw new ErrorHandler(ERROR_CODES.notFound, ERROR_MESSAGES.notFound);
       }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new ErrorHandler(INVALID_DATA_ERROR, 'Invalid data');
+        throw new ErrorHandler(ERROR_CODES.invalidData, ERROR_MESSAGES.invalidData);
       }
       next(err);
     })
@@ -48,9 +45,9 @@ module.exports.createUser = (req, res, next) => {
     .then((user) => res.status(201).send({ _id: user._id }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new ErrorHandler(INVALID_DATA_ERROR, 'Invalid data');
+        throw new ErrorHandler(ERROR_CODES.invalidData, ERROR_MESSAGES.invalidData);
       } else if (err.code === 11000) {
-        throw new ErrorHandler(CONFLICT_ERROR, 'User with this email already exists');
+        throw new ErrorHandler(ERROR_CODES.conflict, ERROR_MESSAGES.conflict);
       } next(err);
     })
     .catch(next);
@@ -65,13 +62,13 @@ module.exports.userLogin = (req, res, next) => {
     .then((user) => {
       // let currentUser = user;
       if (!user) {
-        throw new ErrorHandler(AUTHORIZATION_ERROR, 'Incorrect password or email');
+        throw new ErrorHandler(ERROR_CODES.authorization, ERROR_MESSAGES.authorization);
       }
       const matched = bcrypt.compare(password, user.password);
       return Promise.all([matched, user]);
     }).then(([matched, user]) => {
       if (!matched) {
-        throw new ErrorHandler(AUTHORIZATION_ERROR, 'Incorrect password or email');
+        throw new ErrorHandler(ERROR_CODES.authorization, ERROR_MESSAGES.authorization);
       }
       const token = jwt.sign(
         { _id: user._id },
@@ -84,7 +81,7 @@ module.exports.userLogin = (req, res, next) => {
     })
     .catch((err) => {
       if (err.code === 401) {
-        throw new ErrorHandler(AUTHORIZATION_ERROR, 'Incorrect password or email');
+        throw new ErrorHandler(ERROR_CODES.authorization, ERROR_MESSAGES.authorization);
       }
       next(err);
     })
