@@ -38,6 +38,7 @@ router.delete(
       // id: Joi.string().length(24).hex().required(),
     }),
   }),
+
   deleteArticle,
 );
 
