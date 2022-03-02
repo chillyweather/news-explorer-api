@@ -35,7 +35,7 @@ module.exports.createArticle = (req, res, next) => {
 
 //  delete article
 module.exports.deleteArticle = (req, res, next) => {
-  res.send(req.params);
+  // res.send(req.params);
   Article.findOne({ _id: req.params.id })
   // Article.findById(req.params.id)
     .orFail()
