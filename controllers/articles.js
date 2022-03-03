@@ -25,8 +25,8 @@ module.exports.createArticle = (req, res, next) => {
     keyword, title, text, date, source, link, image, owner: req.user._id,
   })
     .then((article) => {
-      console.log(article)
-      res.send({ data: article })})
+      res.send({ data: article });
+    })
     // .then((article) => res.send({ data: article }))
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -42,8 +42,6 @@ module.exports.deleteArticle = (req, res, next) => {
   Article.findById(req.params.id)
     .orFail()
     .then((article) => {
-      console.log(article);
-      // if (req.user._id === article.owner._id.toString()) {
       if (req.user._id === article.owner.toString()) {
         Article.deleteOne(article).then((deleted) => res.send(deleted));
       } else if (!article) {
