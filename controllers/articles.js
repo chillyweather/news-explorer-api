@@ -24,7 +24,10 @@ module.exports.createArticle = (req, res, next) => {
   Article.create({
     keyword, title, text, date, source, link, image, owner: req.user._id,
   })
-    .then((article) => res.send({ data: article }))
+    .then((article) => {
+      console.log(article)
+      res.send({ data: article })})
+    // .then((article) => res.send({ data: article }))
     .catch((err) => {
       if (err.name === 'CastError') {
         throw new ErrorHandler(ERROR_CODES.invalidData, ERROR_MESSAGES.invalidData);
@@ -39,7 +42,9 @@ module.exports.deleteArticle = (req, res, next) => {
   Article.findById(req.params.id)
     .orFail()
     .then((article) => {
-      if (req.user._id === article.owner._id.toString()) {
+      console.log(article);
+      // if (req.user._id === article.owner._id.toString()) {
+      if (req.user._id === article.owner.toString()) {
         Article.deleteOne(article).then((deleted) => res.send(deleted));
       } else if (!article) {
         throw new ErrorHandler(ERROR_CODES.notFound, ERROR_MESSAGES.notFound);

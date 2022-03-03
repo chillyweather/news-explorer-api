@@ -47,8 +47,8 @@ const articleSchema = new mongoose.Schema({
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
-    select: false,
-    // required: true,
+    // select: false,
+    required: true,
   },
 });
 
