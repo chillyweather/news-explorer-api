@@ -42,7 +42,8 @@ module.exports.deleteArticle = (req, res, next) => {
   Article.findById(req.params.id)
     .orFail()
     .then((article) => {
-      if (req.user._id === article.owner.toString()) {
+      // if (req.user._id === article.owner.toString()) {
+      if (article) {
         Article.deleteOne(article).then((deleted) => res.send(deleted));
       } else if (!article) {
         throw new ErrorHandler(ERROR_CODES.notFound, ERROR_MESSAGES.notFound);
