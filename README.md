@@ -1,2 +1,2 @@
 Public API
-https://api.infostash.students.nomoreparties.sbs
+https://api.infostashserver.students.nomoreparties.sbs
